@@ -24,6 +24,7 @@ android {
     buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "com.wizmusicplayer"
+        vectorDrawables.useSupportLibrary = true
         minSdkVersion 19
         targetSdkVersion 27
         versionCode 1
@@ -83,7 +84,7 @@ dependencies {
     implementation "android.arch.lifecycle:livedata:$aac_version"
     annotationProcessor "android.arch.lifecycle:compiler:$aac_version"
     implementation "android.arch.persistence.room:runtime:$aac_room"
-    annotationProcessor "android.arch.persistence.room:compiler:$aac_room"
+    kapt "android.arch.persistence.room:compiler:$aac_room"
 
     // ***** Android Support Libraries ***** //
     implementation "com.android.support:design:$android_version"
@@ -106,8 +107,15 @@ dependencies {
     kapt 'com.google.dagger:dagger-compiler:2.14.1'
     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
 
+    // ***** Networking Dependencies ***** //
+    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.6.0'
+
     // ***** Image Loading ***** //
     implementation 'com.github.bumptech.glide:glide:4.6.1'
+    kapt 'com.github.bumptech.glide:compiler:4.6.1'
 
     // ***** Runtime Permissions ***** //
     implementation 'com.karumi:dexter:4.2.0'
