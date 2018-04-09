@@ -53,7 +53,7 @@ class MusicRepository @Inject constructor(private val apiService: APIService, pr
                     .subscribeOn(Schedulers.computation())
                     .subscribe({ result ->
                         artistList[index].artistCover = result.artist.image[2].text
-                        artistListLiveData.value = artistList
+                        artistListLiveData.value = artistList.toList()
                     }, { error ->
                         error.printStackTrace()
                     })

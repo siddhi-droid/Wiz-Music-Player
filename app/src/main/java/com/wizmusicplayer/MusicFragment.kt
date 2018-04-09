@@ -68,7 +68,7 @@ class MusicFragment : Fragment(), AnkoLogger {
             view.recyclerView.adapter = artistAdapter
             musicViewModel.getAllArtists().observe(this, Observer {
                 it?.let {
-                    artistAdapter.addArtists(it)
+                    artistAdapter.submitList(it)
                 }
             })
         }
