@@ -31,12 +31,13 @@ class MusicRepository @Inject constructor(private val apiService: APIService, pr
         doAsync {
             val artistList = MusicGenerator.getAllArtists()
             onComplete {
-                getArtistInfo(artistList, artistListLiveData)
                 artistListLiveData.value = artistList
+                getArtistInfo(artistList, artistListLiveData)
             }
         }
         return artistListLiveData
     }
+
 
 
     private fun getArtistInfo(artistList: List<Artist>, artistListLiveData: MutableLiveData<List<Artist>>) {
@@ -56,8 +57,6 @@ class MusicRepository @Inject constructor(private val apiService: APIService, pr
                     }, { error ->
                         error.printStackTrace()
                     })
-
-
         }
     }
 }

@@ -56,7 +56,6 @@ class MusicFragment : Fragment(), AnkoLogger {
     }
 
     private fun setUpGenres() {
-
     }
 
     private fun setUpAlbums() {
@@ -69,7 +68,7 @@ class MusicFragment : Fragment(), AnkoLogger {
             view.recyclerView.adapter = artistAdapter
             musicViewModel.getAllArtists().observe(this, Observer {
                 it?.let {
-                    artistAdapter.submitList(it)
+                    artistAdapter.addArtists(it)
                 }
             })
         }

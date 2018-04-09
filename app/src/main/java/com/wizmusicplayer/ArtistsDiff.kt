@@ -10,10 +10,6 @@ class ArtistsDiff : DiffUtil.ItemCallback<Artist>() {
     }
 
     override fun areContentsTheSame(oldItem: Artist?, newItem: Artist?): Boolean {
-        return false
+        return oldItem == newItem
     }
-
-
-
-
 }
