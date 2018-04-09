@@ -19,6 +19,7 @@ class Dashboard : AppCompatActivity(), AnkoLogger {
     private fun initViewPager() {
         viewPagerAdapter = DashboardViewPagerAdapter(supportFragmentManager, getFragmentTitles())
         viewPager.adapter = viewPagerAdapter
+        viewPager.offscreenPageLimit = 5
         tabLayout.setupWithViewPager(viewPager)
     }
 

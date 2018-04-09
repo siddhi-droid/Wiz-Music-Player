@@ -13,6 +13,7 @@ import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -28,6 +29,7 @@ class NetworkModule {
         return Retrofit.Builder()
                 .baseUrl(Config.BING_BASE_URL)
                 .client(okHttpClient)
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
     }
@@ -55,7 +57,7 @@ class NetworkModule {
     fun getLoggingInterceptor(): HttpLoggingInterceptor {
         val logging = HttpLoggingInterceptor()
         if (BuildConfig.DEBUG) {
-            logging.level = HttpLoggingInterceptor.Level.BODY
+            logging.level = HttpLoggingInterceptor.Level.NONE
         } else {
             logging.level = HttpLoggingInterceptor.Level.NONE
         }

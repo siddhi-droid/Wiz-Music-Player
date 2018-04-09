@@ -5,4 +5,4 @@ data class Artist(
         val artistId: Long,
         val artistName: String,
         val artistTracks: String,
-        val artistCover: String = "")
+        var artistCover: String = "")

@@ -23,7 +23,8 @@ class ArtistsAdapter : ListAdapter<Artist, ArtistsAdapter.ViewHolder>(ArtistsDif
                     .plus(" \u2022 ")
                     .plus(artist.artistTracks)
                     .plus(" Tracks")
-            itemView.artistName.text = artist.artistName
+            itemView.artistName.text = artist.artistCover
+            itemView.artistCoverImage.loadURL(artist.artistCover)
         }
     }
 }

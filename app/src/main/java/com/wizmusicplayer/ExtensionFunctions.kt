@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import okhttp3.Call
 
 fun ImageView.loadURL(url: String) {
     GlideApp

@@ -10,10 +10,11 @@ import android.view.View
 import android.view.ViewGroup
 import com.wizmusicplayer.ui.MusicViewModel
 import kotlinx.android.synthetic.main.fragment_music.view.*
+import org.jetbrains.anko.AnkoLogger
 import javax.inject.Inject
 
 
-class MusicFragment : Fragment() {
+class MusicFragment : Fragment(), AnkoLogger {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -59,7 +60,6 @@ class MusicFragment : Fragment() {
     }
 
     private fun setUpAlbums() {
-
     }
 
     private fun setUpArtists() {
@@ -67,7 +67,11 @@ class MusicFragment : Fragment() {
         activity?.let {
             view.recyclerView.withGridLayout2X2(it)
             view.recyclerView.adapter = artistAdapter
-            getArtists()
+            musicViewModel.getAllArtists().observe(this, Observer {
+                it?.let {
+                    artistAdapter.submitList(it)
+                }
+            })
         }
     }
 
@@ -82,10 +86,5 @@ class MusicFragment : Fragment() {
                 }
             })
         }
-    }
-
-
-    private fun getArtists() {
-
     }
 }

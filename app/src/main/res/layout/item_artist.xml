@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clickable="true"
-    android:foreground="?attr/selectableItemBackground">
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
@@ -22,7 +22,7 @@
             android:id="@+id/artistName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/black"
+            android:background="@color/primaryTextColor"
             android:ellipsize="end"
             android:fontFamily="@font/cabin"
             android:maxLines="1"
@@ -35,7 +35,7 @@
             android:id="@+id/artistDetails"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/black"
+            android:background="@color/primaryTextColor"
             android:fontFamily="@font/cabin"
             android:padding="8dp"
             android:textColor="@android:color/secondary_text_dark"
