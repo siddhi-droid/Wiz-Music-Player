@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.AnkoLogger
 
+
 class Dashboard : AppCompatActivity(), AnkoLogger {
 
     private lateinit var viewPagerAdapter: DashboardViewPagerAdapter
@@ -13,7 +14,6 @@ class Dashboard : AppCompatActivity(), AnkoLogger {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initViewPager()
-
     }
 
     private fun initViewPager() {

@@ -8,21 +8,30 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import android.widget.RelativeLayout
+import android.widget.TextView
 
 
 fun ImageView.loadURL(url: String) {
-    GlideApp
-            .with(context)
+    GlideApp.with(context)
             .load(url)
             .placeholder(R.drawable.audio_track)
             .error(R.drawable.audio_track)
-            .transition(DrawableTransitionOptions.withCrossFade())
             .into(this)
+
+
+}
+
+fun ImageView.loadPaletteURL(url: String, title: TextView, subTitle: TextView, background: RelativeLayout) {
+
+
 }
 
 fun RecyclerView.withLinearLayout(context: Context) {
     this.layoutManager = LinearLayoutManager(context)
+    val decoration = PinnedHeaderDecoration()
+    decoration.registerTypePinnedHeader(1) { _, _ -> true }
+    this.addItemDecoration(decoration)
 }
 
 fun RecyclerView.withGridLayout2X2(context: Context) {

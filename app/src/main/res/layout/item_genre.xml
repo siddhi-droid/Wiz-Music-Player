@@ -11,7 +11,7 @@
 
 
     <android.support.v7.widget.AppCompatImageView
-        android:id="@+id/artistCoverImage"
+        android:id="@+id/genreCoverImage"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_margin="8dp"
@@ -21,12 +21,12 @@
         app:srcCompat="@drawable/audio_track" />
 
     <TextView
-        android:id="@+id/artistName"
+        android:id="@+id/genreName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="9dp"
         android:layout_marginTop="12dp"
-        android:layout_toEndOf="@+id/artistCoverImage"
+        android:layout_toEndOf="@+id/genreCoverImage"
         android:background="@android:color/transparent"
         android:ellipsize="end"
         android:fontFamily="@font/cabin"
@@ -36,12 +36,12 @@
         tools:text="Random text here" />
 
     <TextView
-        android:id="@+id/artistDetails"
+        android:id="@+id/genreDetails"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/artistName"
+        android:layout_below="@+id/genreName"
         android:layout_marginStart="9dp"
-        android:layout_toEndOf="@+id/artistCoverImage"
+        android:layout_toEndOf="@+id/genreCoverImage"
         android:background="@android:color/transparent"
         android:fontFamily="@font/cabin"
         android:textColor="@color/secondaryTextColor"

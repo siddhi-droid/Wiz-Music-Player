@@ -5,16 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_centerVertical="true"
+    android:layout_margin="8dp"
     android:background="?selectableItemBackground"
     android:clickable="true">
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0.5dp"
-        android:layout_above="@+id/trackCoverImage"
-        android:layout_marginStart="12dp"
-        android:layout_toEndOf="@+id/trackCoverImage"
-        android:background="@color/divider" />
 
 
     <android.support.v7.widget.AppCompatImageView
@@ -22,6 +15,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_margin="8dp"
+        android:background="@android:color/transparent"
         android:contentDescription="@string/track_image"
         android:scaleType="centerCrop"
         app:srcCompat="@drawable/audio_track" />
@@ -33,6 +27,7 @@
         android:layout_marginStart="9dp"
         android:layout_marginTop="12dp"
         android:layout_toEndOf="@+id/trackCoverImage"
+        android:background="@android:color/transparent"
         android:ellipsize="end"
         android:fontFamily="@font/cabin"
         android:maxLines="1"
@@ -47,18 +42,11 @@
         android:layout_below="@+id/trackTitle"
         android:layout_marginStart="9dp"
         android:layout_toEndOf="@+id/trackCoverImage"
+        android:background="@android:color/transparent"
         android:fontFamily="@font/cabin"
         android:textColor="@color/secondaryTextColor"
         android:textSize="12sp"
         tools:text="Random text here" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0.5dp"
-        android:layout_below="@+id/trackArtist"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="16dp"
-        android:layout_toEndOf="@+id/trackCoverImage"
-        android:background="@color/divider" />
 
 </RelativeLayout>

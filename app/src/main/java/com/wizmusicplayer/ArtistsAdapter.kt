@@ -16,6 +16,15 @@ class ArtistsAdapter : ListAdapter<Artist, ArtistsAdapter.ViewHolder>(ArtistsDif
         holder.bind(getItem(position))
     }
 
+    fun getLetterPosition(letter: String): Int {
+        for (track in 0 until itemCount) {
+            if (getItem(track).artistName.toUpperCase().take(1) == letter)
+                return track
+        }
+        return -1
+    }
+
+
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         fun bind(artist: Artist) {
             itemView.artistDetails.text = artist.artistAlbums

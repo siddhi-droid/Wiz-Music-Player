@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.wizmusicplayer.ui.MusicViewModel
+import kotlinx.android.synthetic.main.fragment_music.*
 import kotlinx.android.synthetic.main.fragment_music.view.*
 import org.jetbrains.anko.AnkoLogger
 import javax.inject.Inject
@@ -21,6 +22,8 @@ class MusicFragment : Fragment(), AnkoLogger {
 
     lateinit var musicTrackAdapter: MusicTrackAdapter
     lateinit var artistAdapter: ArtistsAdapter
+    lateinit var albumsAdapter: AlbumsAdapter
+    lateinit var genreAdapter: GenreAdapter
     internal lateinit var view: View
     lateinit var musicViewModel: MusicViewModel
 
@@ -41,12 +44,12 @@ class MusicFragment : Fragment(), AnkoLogger {
         return view
     }
 
-    fun initViewModel() {
+    private fun initViewModel() {
         WizApplication.instance.getApplicationComponent().inject(this)
         musicViewModel = ViewModelProviders.of(this, viewModelFactory).get(MusicViewModel::class.java)
     }
 
-    fun checkArguments() {
+    private fun checkArguments() {
         when (arguments?.get(Config.FRAGMENT_TYPE)) {
             Config.MusicConfig.TRACKS -> setUpTracks()
             Config.MusicConfig.ARTISTS -> setUpArtists()
@@ -56,25 +59,67 @@ class MusicFragment : Fragment(), AnkoLogger {
     }
 
     private fun setUpGenres() {
+        genreAdapter = GenreAdapter()
+        activity?.let {
+            view.recyclerView.withLinearLayout(it)
+            view.recyclerView.adapter = genreAdapter
+            musicViewModel.getAllGenre().observe(this, Observer {
+                it?.let {
+                    genreAdapter.submitList(it)
+                }
+            })
+        }
+
+        view.sideView.setOnTouchLetterChangeListener({ letter ->
+            val position = genreAdapter.getLetterPosition(letter)
+            if (position != -1) {
+                recyclerView.smoothScrollToPosition(position)
+            }
+        })
     }
 
     private fun setUpAlbums() {
+        albumsAdapter = AlbumsAdapter()
+        activity?.let {
+            view.recyclerView.withLinearLayout(it)
+            view.recyclerView.adapter = albumsAdapter
+            musicViewModel.getAllAlbums().observe(this, Observer {
+                it?.let {
+                    albumsAdapter.submitList(it)
+                }
+            })
+        }
+
+        view.sideView.setOnTouchLetterChangeListener({ letter ->
+            val position = albumsAdapter.getLetterPosition(letter)
+            if (position != -1) {
+                recyclerView.smoothScrollToPosition(position)
+            }
+        })
     }
 
     private fun setUpArtists() {
         artistAdapter = ArtistsAdapter()
         activity?.let {
-            view.recyclerView.withGridLayout2X2(it)
+            view.recyclerView.withLinearLayout(it)
             view.recyclerView.adapter = artistAdapter
             musicViewModel.getAllArtists().observe(this, Observer {
                 it?.let {
                     artistAdapter.submitList(it)
                 }
             })
+
+            view.sideView.setOnTouchLetterChangeListener({ letter ->
+                val position = artistAdapter.getLetterPosition(letter)
+                if (position != -1) {
+                    recyclerView.smoothScrollToPosition(position)
+                }
+            })
+
         }
     }
 
-    fun setUpTracks() {
+    private fun setUpTracks() {
         musicTrackAdapter = MusicTrackAdapter()
         activity?.let {
             view.recyclerView.withLinearLayout(it)
@@ -82,6 +127,14 @@ class MusicFragment : Fragment(), AnkoLogger {
             musicViewModel.getAllTracks().observe(this, Observer {
                 it?.let {
                     musicTrackAdapter.submitList(it)
+                }
+            })
+
+
+            view.sideView.setOnTouchLetterChangeListener({ letter ->
+                val position = musicTrackAdapter.getLetterPosition(letter)
+                if (position != -1) {
+                    recyclerView.smoothScrollToPosition(position)
                 }
             })
         }
