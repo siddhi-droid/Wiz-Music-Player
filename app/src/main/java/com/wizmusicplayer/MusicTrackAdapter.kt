@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.item_music_track.view.*
 
-class MusicTrackAdapter : ListAdapter<MusicTrack, MusicTrackAdapter.ViewHolder>(MusicTracksDiff()) {
+class MusicTrackAdapter(var tracksInterface: TracksInterface) : ListAdapter<MusicTrack, MusicTrackAdapter.ViewHolder>(MusicTracksDiff()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(parent.inflate(R.layout.item_music_track))
@@ -24,11 +24,28 @@ class MusicTrackAdapter : ListAdapter<MusicTrack, MusicTrackAdapter.ViewHolder>(
         return -1
     }
 
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         fun bind(musicTrack: MusicTrack) {
             itemView.trackArtist.text = musicTrack.artist.plus(" \u2022 ").plus(MusicUtils.convertDuration(musicTrack.duration.toLong()))
             itemView.trackTitle.text = musicTrack.title
             itemView.trackCoverImage.loadURL(musicTrack.trackArt)
+            if (adapterPosition == -1)
+                return
+            itemView.rootLayout.setOnClickListener { tracksInterface.onClick(adapterPosition, getAllTracks()) }
         }
+    }
+
+
+    fun getAllTracks(): ArrayList<MusicTrack> {
+        val tracksList: ArrayList<MusicTrack> = ArrayList()
+        for (track in 0 until itemCount) {
+            tracksList.add(getItem(track))
+        }
+
+        return tracksList
+    }
+
+    interface TracksInterface {
+        fun onClick(position: Int, musicList: ArrayList<MusicTrack>)
     }
 }

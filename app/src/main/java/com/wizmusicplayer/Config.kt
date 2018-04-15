@@ -16,6 +16,8 @@ class Config {
             const val ARTISTS = "artists"
             const val ALBUMS = "albums"
             const val GENRE = "genre"
+            const val MUSIC_TRACKS = "music_tracks"
+            const val MUSIC_TRACK_POSITION = "music_track_position"
         }
     }
 }

@@ -6,6 +6,7 @@ import com.wizmusicplayer.Artist
 import com.wizmusicplayer.Genre
 import com.wizmusicplayer.MusicAlbum
 import com.wizmusicplayer.MusicTrack
+import io.reactivex.Completable
 import javax.inject.Inject
 
 class MusicViewModel @Inject constructor(private val musicRepository: MusicRepository) : ViewModel() {

@@ -1,5 +1,6 @@
 package com.wizmusicplayer
 
+import android.app.Activity
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
@@ -15,17 +16,27 @@ import org.jetbrains.anko.AnkoLogger
 import javax.inject.Inject
 
 
-class MusicFragment : Fragment(), AnkoLogger {
+class MusicFragment : Fragment(), MusicTrackAdapter.TracksInterface, AnkoLogger {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
-    lateinit var musicTrackAdapter: MusicTrackAdapter
-    lateinit var artistAdapter: ArtistsAdapter
-    lateinit var albumsAdapter: AlbumsAdapter
-    lateinit var genreAdapter: GenreAdapter
+    private lateinit var musicTrackAdapter: MusicTrackAdapter
+    private lateinit var artistAdapter: ArtistsAdapter
+    private lateinit var albumsAdapter: AlbumsAdapter
+    private lateinit var genreAdapter: GenreAdapter
     internal lateinit var view: View
-    lateinit var musicViewModel: MusicViewModel
+    private lateinit var musicViewModel: MusicViewModel
+    private lateinit var musicCallbackInterface: MusicCallbackInterface
+
+    override fun onAttach(activity: Activity?) {
+        super.onAttach(activity)
+        try {
+            musicCallbackInterface = (activity as MusicCallbackInterface?)!!
+        } catch (e: ClassCastException) {
+            e.printStackTrace()
+        }
+    }
 
     companion object {
         fun newInstance(fragmentType: String): MusicFragment {
@@ -73,7 +84,7 @@ class MusicFragment : Fragment(), AnkoLogger {
         view.sideView.setOnTouchLetterChangeListener({ letter ->
             val position = genreAdapter.getLetterPosition(letter)
             if (position != -1) {
-                recyclerView.smoothScrollToPosition(position)
+                recyclerView.scrollToPosition(position)
             }
         })
     }
@@ -93,7 +104,7 @@ class MusicFragment : Fragment(), AnkoLogger {
         view.sideView.setOnTouchLetterChangeListener({ letter ->
             val position = albumsAdapter.getLetterPosition(letter)
             if (position != -1) {
-                recyclerView.smoothScrollToPosition(position)
+                recyclerView.scrollToPosition(position)
             }
         })
     }
@@ -112,15 +123,14 @@ class MusicFragment : Fragment(), AnkoLogger {
             view.sideView.setOnTouchLetterChangeListener({ letter ->
                 val position = artistAdapter.getLetterPosition(letter)
                 if (position != -1) {
-                    recyclerView.smoothScrollToPosition(position)
+                    recyclerView.scrollToPosition(position)
                 }
             })
-
         }
     }
 
     private fun setUpTracks() {
-        musicTrackAdapter = MusicTrackAdapter()
+        musicTrackAdapter = MusicTrackAdapter(this)
         activity?.let {
             view.recyclerView.withLinearLayout(it)
             view.recyclerView.adapter = musicTrackAdapter
@@ -134,9 +144,13 @@ class MusicFragment : Fragment(), AnkoLogger {
             view.sideView.setOnTouchLetterChangeListener({ letter ->
                 val position = musicTrackAdapter.getLetterPosition(letter)
                 if (position != -1) {
-                    recyclerView.smoothScrollToPosition(position)
+                    recyclerView.scrollToPosition(position)
                 }
             })
         }
+    }
+
+    override fun onClick(position: Int, musicList: ArrayList<MusicTrack>) {
+        musicCallbackInterface.playTrack(position, musicList)
     }
 }

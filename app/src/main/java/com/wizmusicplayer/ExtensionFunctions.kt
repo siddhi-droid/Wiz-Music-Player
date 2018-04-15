@@ -18,12 +18,9 @@ fun ImageView.loadURL(url: String) {
             .placeholder(R.drawable.audio_track)
             .error(R.drawable.audio_track)
             .into(this)
-
-
 }
 
 fun ImageView.loadPaletteURL(url: String, title: TextView, subTitle: TextView, background: RelativeLayout) {
-
 
 }
 

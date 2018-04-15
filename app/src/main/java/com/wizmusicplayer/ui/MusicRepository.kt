@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData
 import com.wizmusicplayer.*
 import com.wizmusicplayer.database.WizDatabase
 import com.wizmusicplayer.networking.APIService
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiConsumer

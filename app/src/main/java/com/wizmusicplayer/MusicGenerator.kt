@@ -18,7 +18,8 @@ class MusicGenerator {
                 MediaStore.Audio.AudioColumns.TITLE,
                 MediaStore.Audio.AudioColumns.ARTIST,
                 MediaStore.Audio.AudioColumns.ALBUM_ID,
-                MediaStore.Audio.AudioColumns.DURATION)
+                MediaStore.Audio.AudioColumns.DURATION,
+                MediaStore.Audio.AudioColumns.DATA)
 
         @SuppressLint("Recycle")
         fun getAllTracks(): List<MusicTrack> {
@@ -30,7 +31,8 @@ class MusicGenerator {
                     MediaStore.Audio.Media.TITLE,
                     MediaStore.Audio.Media.ARTIST,
                     MediaStore.Audio.Media.ALBUM_ID,
-                    MediaStore.Audio.Media.DURATION)
+                    MediaStore.Audio.Media.DURATION,
+                    MediaStore.Audio.Media.DATA)
 
             val cursor = WizApplication.instance.contentResolver.query(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -50,7 +52,9 @@ class MusicGenerator {
                                 albumId = cursor.getString(3),
                                 duration = "${cursor.getLong(4)}",
                                 trackArt = "${ContentUris.withAppendedId(albumArtUri,
-                                        cursor.getString(3).toLong())}")
+                                        cursor.getString(3).toLong())}",
+                                fileUri = Uri.parse(cursor.getString(5)))
+
                         allTracksList.add(musicTrack)
                     } while (cursor.moveToNext())
                 }
@@ -59,6 +63,7 @@ class MusicGenerator {
             } finally {
                 cursor.close()
             }
+
             return allTracksList
         }
 
@@ -147,7 +152,8 @@ class MusicGenerator {
                     MediaStore.Audio.Media.TITLE,
                     MediaStore.Audio.Media.ARTIST,
                     MediaStore.Audio.Media.ALBUM_ID,
-                    MediaStore.Audio.Media.DURATION)
+                    MediaStore.Audio.Media.DURATION,
+                    MediaStore.Audio.Media.DATA)
 
             val selection = "is_music=1 AND title != '' AND album_id=$albumID"
 
@@ -168,7 +174,8 @@ class MusicGenerator {
                                 albumId = cursor.getString(3),
                                 duration = cursor.getString(4),
                                 trackArt = "${ContentUris.withAppendedId(albumArtUri,
-                                        cursor.getString(3).toLong())}")
+                                        cursor.getString(3).toLong())}",
+                                fileUri = Uri.parse(cursor.getString(5)))
 
                         tracksList.add(musicTrack)
                     } while (cursor.moveToNext())
@@ -191,7 +198,8 @@ class MusicGenerator {
                     MediaStore.Audio.Media.TITLE,
                     MediaStore.Audio.Media.ARTIST,
                     MediaStore.Audio.Media.ALBUM_ID,
-                    MediaStore.Audio.Media.DURATION)
+                    MediaStore.Audio.Media.DURATION,
+                    MediaStore.Audio.Media.DATA)
 
             val selection = "is_music=1 AND title != '' AND artist_id=$artistId"
 
@@ -212,7 +220,8 @@ class MusicGenerator {
                                 albumId = cursor.getString(3),
                                 duration = cursor.getString(4),
                                 trackArt = "${ContentUris.withAppendedId(albumArtUri,
-                                        cursor.getString(3).toLong())}")
+                                        cursor.getString(3).toLong())}",
+                                fileUri = Uri.parse(cursor.getString(5)))
 
                         tracksList.add(musicTrack)
                     } while (cursor.moveToNext())
@@ -280,7 +289,8 @@ class MusicGenerator {
                                 albumId = cursor.getString(3),
                                 duration = "${cursor.getLong(4)}",
                                 trackArt = "${ContentUris.withAppendedId(albumArtUri,
-                                        cursor.getString(3).toLong())}")
+                                        cursor.getString(3).toLong())}",
+                                fileUri = Uri.parse(cursor.getString(5)))
                         musicTrackList.add(musicTrack)
                     } while (cursor.moveToNext())
                 }
