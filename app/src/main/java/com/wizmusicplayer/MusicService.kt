@@ -20,6 +20,7 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.text.TextUtils
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import android.content.Intent
 
 
 class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener, MediaPlayer.OnCompletionListener, AnkoLogger {
@@ -44,7 +45,6 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
     override fun onLoadChildren(parentId: String, result: MediaBrowserServiceCompat.Result<List<MediaBrowserCompat.MediaItem>>) {
         result.sendResult(listOf())
     }
-
 
     override fun onAudioFocusChange(focusChange: Int) {
         when (focusChange) {
@@ -90,7 +90,6 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         initNotificationManger()
         initNoisyReceiver()
     }
-
 
     private fun initNotificationManger() {
         notificationManager = NotificationManager()
@@ -152,6 +151,7 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
             mediaPlayer.start()
             mediaSession.isActive = true
             setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING)
+            updateNotification()
         }
 
         override fun onPause() {
@@ -161,6 +161,11 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
                 setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED)
                 updateNotification()
             }
+        }
+
+        override fun onStop() {
+            super.onStop()
+            info { "onStop" }
         }
 
         override fun onSeekTo(pos: Long) {
@@ -176,7 +181,26 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
 
             playSong(musicList?.get(trackPosition))
         }
+
+        override fun onSkipToNext() {
+            super.onSkipToNext()
+            playNextTrack()
+        }
+
+        override fun onSkipToPrevious() {
+            super.onSkipToPrevious()
+            playPreviousTrack()
+        }
     }
+
+    private fun playPreviousTrack() {
+
+    }
+
+    private fun playNextTrack() {
+
+    }
+
 
     private fun readBundle(extras: Bundle?) {
         extras?.classLoader = this@MusicService.classLoader
@@ -196,6 +220,7 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         mediaPlayer.setOnPreparedListener {
 
             if (successfullyRetrievedAudioFocus()) {
+                startService(Intent(applicationContext, MusicService::class.java))
                 mediaSession.isActive = true
                 mediaPlayer.start()
                 setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING)
@@ -233,22 +258,19 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
     }
 
     private fun updateNotification() {
-        val notification = notificationManager.getNotification(
-                metadataBuilder.build(),
-                playbackStateBuilder.build(),
-                mediaSession.sessionToken)
-        notificationManager.getNotificationManager()
-                .notify(1337, notification)
+        val notification = notificationManager.getNotification(metadataBuilder.build(), playbackStateBuilder.build(), mediaSession.sessionToken)
+        startForeground(1337, notification)
     }
 
     override fun onDestroy() {
         info { "onDestroy" }
+        updateNotification()
         super.onDestroy()
-        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        audioManager.abandonAudioFocus(this)
         unregisterReceiver(mNoisyReceiver)
-        mediaSession.release()
-        NotificationManagerCompat.from(this).cancel(1)
+//        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+//        audioManager.abandonAudioFocus(this)
+//        mediaSession.release()
+//        NotificationManagerCompat.from(this).cancel(1337)
     }
 
 }

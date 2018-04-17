@@ -136,13 +136,13 @@ class Dashboard : AppCompatActivity(), MusicCallbackInterface, AnkoLogger {
 
     override fun onDestroy() {
         super.onDestroy()
-        MediaControllerCompat.getMediaController(this).playbackState?.let {
-            if (MediaControllerCompat.getMediaController(this).playbackState.state == PlaybackStateCompat.STATE_PLAYING) {
-                MediaControllerCompat.getMediaController(this).transportControls.pause()
-            }
-        }
-
-        mMediaBrowserCompat.disconnect()
+//        MediaControllerCompat.getMediaController(this).playbackState?.let {
+//            if (MediaControllerCompat.getMediaController(this).playbackState.state == PlaybackStateCompat.STATE_PLAYING) {
+//                MediaControllerCompat.getMediaController(this).transportControls.pause()
+//            }
+//        }
+//
+//        mMediaBrowserCompat.disconnect()
     }
 
     public override fun onStart() {

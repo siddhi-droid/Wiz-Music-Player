@@ -68,10 +68,6 @@ class NotificationManager : AnkoLogger {
     }
 
 
-    fun getNotificationManager(): NotificationManager {
-        return mNotificationManager
-    }
-
     fun getNotification(metadata: MediaMetadataCompat,
                         playbackState: PlaybackStateCompat,
                         token: MediaSessionCompat.Token): Notification {
@@ -115,12 +111,7 @@ class NotificationManager : AnkoLogger {
         builder.setStyle(
                 android.support.v4.media.app.NotificationCompat.MediaStyle()
                         .setMediaSession(token)
-                        .setShowActionsInCompactView(2)
-                        .setShowCancelButton(true)
-                        .setCancelButtonIntent(
-                                MediaButtonReceiver.buildMediaButtonPendingIntent(
-                                        mService,
-                                        PlaybackStateCompat.ACTION_STOP)))
+                        .setShowActionsInCompactView(2))
 
         return builder
     }
