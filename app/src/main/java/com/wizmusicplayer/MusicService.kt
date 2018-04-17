@@ -1,12 +1,12 @@
 package com.wizmusicplayer
 
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.*
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.AudioManager
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Bundle
 import android.os.PowerManager
 import android.support.annotation.Nullable
@@ -20,18 +20,18 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.text.TextUtils
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import java.util.*
 
 
 class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener, MediaPlayer.OnCompletionListener, AnkoLogger {
 
-    private lateinit var mMediaSession: MediaSessionCompat
-    private lateinit var mMediaPlayer: MediaPlayer
-    private lateinit var musicTrack: MusicTrack
-    private lateinit var mNotificationManager: com.wizmusicplayer.NotificationManager
+    private lateinit var mediaSession: MediaSessionCompat
+    private lateinit var mediaPlayer: MediaPlayer
+    private var currentTrack: MusicTrack? = null
+    private lateinit var notificationManager: com.wizmusicplayer.NotificationManager
     private lateinit var playbackStateBuilder: PlaybackStateCompat.Builder
     private lateinit var metadataBuilder: MediaMetadataCompat.Builder
     private var trackPosition: Int = 0
+    private var musicList: java.util.ArrayList<MusicTrack>? = ArrayList()
     private var trackBitmap: Bitmap? = null
 
     @Nullable
@@ -56,44 +56,30 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
     }
 
     private fun audiMangerGain() {
-        if (!mMediaPlayer.isPlaying) {
-            mMediaPlayer.start()
+        if (!mediaPlayer.isPlaying) {
+            mediaPlayer.start()
         }
-        mMediaPlayer.setVolume(1.0f, 1.0f);
+        mediaPlayer.setVolume(1.0f, 1.0f)
     }
 
     private fun audioManagerTransientCanDuck() {
-        mMediaPlayer.setVolume(0.3f, 0.3f);
+        mediaPlayer.setVolume(0.3f, 0.3f)
     }
 
     private fun audioManagerTransient() {
-        mMediaPlayer.pause()
+        mediaPlayer.pause()
     }
 
     private fun audioManagerLoss() {
-        if (mMediaPlayer.isPlaying) {
-            mMediaPlayer.stop()
+        if (mediaPlayer.isPlaying) {
+            mediaPlayer.stop()
         }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         info { "onStartCommand" }
-        MediaButtonReceiver.handleIntent(mMediaSession, intent)
-        setMusic(intent?.getParcelableArrayListExtra(Config.MusicConfig.MUSIC_TRACKS), intent?.getIntExtra(Config.MusicConfig.MUSIC_TRACK_POSITION, 0))
+        MediaButtonReceiver.handleIntent(mediaSession, intent)
         return START_NOT_STICKY
-    }
-
-    private fun setMusic(songsList: ArrayList<MusicTrack>?, position: Int?) {
-        position?.let {
-            trackPosition = it
-        }
-
-        songsList?.let {
-            musicTrack = songsList[trackPosition]
-        }
-
-        playSong(musicTrack)
-
     }
 
     override fun onCreate() {
@@ -107,8 +93,8 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
 
 
     private fun initNotificationManger() {
-        mNotificationManager = NotificationManager()
-        mNotificationManager.initNotificationManager(this)
+        notificationManager = NotificationManager()
+        notificationManager.initNotificationManager(this)
     }
 
     private fun initNoisyReceiver() {
@@ -117,33 +103,33 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
     }
 
     private fun initMediaPlayer() {
-        mMediaPlayer = MediaPlayer()
-        mMediaPlayer.setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
-        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC)
-        mMediaPlayer.setVolume(1.0f, 1.0f)
+        mediaPlayer = MediaPlayer()
+        mediaPlayer.setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC)
+        mediaPlayer.setVolume(1.0f, 1.0f)
     }
 
     private val mNoisyReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            if (mMediaPlayer.isPlaying) {
-                mMediaPlayer.pause()
+            if (mediaPlayer.isPlaying) {
+                mediaPlayer.pause()
             }
         }
     }
 
     private fun initMediaSession() {
         val mediaButtonReceiver = ComponentName(applicationContext, MediaButtonReceiver::class.java)
-        mMediaSession = MediaSessionCompat(applicationContext, "Wiz_Music_Service", mediaButtonReceiver, null)
+        mediaSession = MediaSessionCompat(applicationContext, "Wiz_Music_Service", mediaButtonReceiver, null)
 
-        mMediaSession.setCallback(MediaSessionCallback())
-        mMediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
+        mediaSession.setCallback(MediaSessionCallback())
+        mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
 
         val mediaButtonIntent = Intent(Intent.ACTION_MEDIA_BUTTON)
         mediaButtonIntent.setClass(this, MediaButtonReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(this, 0, mediaButtonIntent, 0)
-        mMediaSession.setMediaButtonReceiver(pendingIntent)
+        mediaSession.setMediaButtonReceiver(pendingIntent)
 
-        sessionToken = mMediaSession.sessionToken
+        sessionToken = mediaSession.sessionToken
     }
 
 
@@ -163,38 +149,55 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
                 return
             }
 
-            mMediaPlayer.start()
-            mMediaSession.isActive = true
+            mediaPlayer.start()
+            mediaSession.isActive = true
             setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING)
         }
 
         override fun onPause() {
             super.onPause()
-            if (mMediaPlayer.isPlaying) {
-                mMediaPlayer.pause()
+            if (mediaPlayer.isPlaying) {
+                mediaPlayer.pause()
                 setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED)
+                updateNotification()
             }
         }
 
         override fun onSeekTo(pos: Long) {
             super.onSeekTo(pos)
         }
+
+        override fun onPlayFromUri(uri: Uri?, extras: Bundle?) {
+            super.onPlayFromUri(uri, extras)
+
+            readBundle(extras)
+
+            currentTrack = musicList?.get(trackPosition)
+
+            playSong(musicList?.get(trackPosition))
+        }
+    }
+
+    private fun readBundle(extras: Bundle?) {
+        extras?.classLoader = this@MusicService.classLoader
+        musicList = extras?.getParcelableArrayList(Config.MusicConfig.MUSIC_TRACKS)
+        trackPosition = extras?.get(Config.MusicConfig.MUSIC_TRACK_POSITION) as Int
     }
 
 
     private fun playSong(musicTrack: MusicTrack?) {
 
-        mMediaPlayer.reset()
+        mediaPlayer.reset()
 
-        mMediaPlayer.setDataSource(this@MusicService, musicTrack?.fileUri)
+        mediaPlayer.setDataSource(this@MusicService, musicTrack?.fileUri)
 
-        mMediaPlayer.prepareAsync()
+        mediaPlayer.prepareAsync()
 
-        mMediaPlayer.setOnPreparedListener {
+        mediaPlayer.setOnPreparedListener {
 
             if (successfullyRetrievedAudioFocus()) {
-                mMediaSession.isActive = true
-                mMediaPlayer.start()
+                mediaSession.isActive = true
+                mediaPlayer.start()
                 setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING)
                 initMediaSessionMetadata()
                 updateNotification()
@@ -210,7 +213,7 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
             playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE or PlaybackStateCompat.ACTION_PLAY)
         }
         playbackStateBuilder.setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0f)
-        mMediaSession.setPlaybackState(playbackStateBuilder.build())
+        mediaSession.setPlaybackState(playbackStateBuilder.build())
     }
 
 
@@ -219,22 +222,22 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, trackBitmap)
         metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, trackBitmap)
         metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher))
-        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, musicTrack.title)
-        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, musicTrack.artist)
-        mMediaSession.setMetadata(metadataBuilder.build())
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, currentTrack?.title)
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, currentTrack?.artist)
+        mediaSession.setMetadata(metadataBuilder.build())
     }
 
 
     override fun onCompletion(mp: MediaPlayer?) {
-        mMediaPlayer.release()
+        mediaPlayer.release()
     }
 
     private fun updateNotification() {
-        val notification = mNotificationManager.getNotification(
+        val notification = notificationManager.getNotification(
                 metadataBuilder.build(),
                 playbackStateBuilder.build(),
-                mMediaSession.sessionToken)
-        mNotificationManager.getNotificationManager()
+                mediaSession.sessionToken)
+        notificationManager.getNotificationManager()
                 .notify(1337, notification)
     }
 
@@ -244,7 +247,7 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         audioManager.abandonAudioFocus(this)
         unregisterReceiver(mNoisyReceiver)
-        mMediaSession.release()
+        mediaSession.release()
         NotificationManagerCompat.from(this).cancel(1)
     }
 

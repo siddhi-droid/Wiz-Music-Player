@@ -16,9 +16,11 @@ import android.support.v4.media.session.PlaybackStateCompat.STATE_PAUSED
 import android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING
 import android.support.v7.app.AppCompatActivity
 import android.view.WindowManager
+import androidx.core.net.toUri
 import com.wizmusicplayer.ui.MusicViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.bundleOf
 import org.jetbrains.anko.info
 import javax.inject.Inject
 
@@ -90,7 +92,7 @@ class Dashboard : AppCompatActivity(), MusicCallbackInterface, AnkoLogger {
         }
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-            info { metadata.toString() }
+            info { metadata }
         }
 
     }
@@ -153,9 +155,12 @@ class Dashboard : AppCompatActivity(), MusicCallbackInterface, AnkoLogger {
     }
 
     override fun playTrack(position: Int, musicList: ArrayList<MusicTrack>) {
-        val intent = Intent(this, MusicService::class.java)
-        intent.putExtra(Config.MusicConfig.MUSIC_TRACKS, musicList)
-        intent.putExtra(Config.MusicConfig.MUSIC_TRACK_POSITION, position)
-        startService(intent)
+
+        val bundle = bundleOf(
+                Config.MusicConfig.MUSIC_TRACKS to musicList,
+                Config.MusicConfig.MUSIC_TRACK_POSITION to position)
+
+        MediaControllerCompat.getMediaController(this).transportControls.playFromUri("Hack".toUri(), bundle)
+
     }
 }
