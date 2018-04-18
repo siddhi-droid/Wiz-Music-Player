@@ -248,13 +248,11 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
 
     private fun setMediaPlaybackState(state: Int) {
         playbackStateBuilder = PlaybackStateCompat.Builder()
-        if (state == PlaybackStateCompat.STATE_PLAYING) {
-            playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE or PlaybackStateCompat.ACTION_PAUSE)
-        } else {
-            playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE or PlaybackStateCompat.ACTION_PLAY)
-        }
-
-        playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_SKIP_TO_NEXT or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
+        playbackStateBuilder.setActions(
+                PlaybackStateCompat.ACTION_PLAY or
+                PlaybackStateCompat.ACTION_PAUSE or
+                PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
         playbackStateBuilder.setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0f)
         mediaSession.setPlaybackState(playbackStateBuilder.build())
     }
