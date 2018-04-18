@@ -82,17 +82,27 @@ class NotificationManager : AnkoLogger {
                                   isPlaying: Boolean,
                                   description: MediaDescriptionCompat): NotificationCompat.Builder {
 
+        // Create the (mandatory) notification channel when running on Android Oreo.
         if (isAndroidOreo()) {
             createChannel()
         }
 
         val builder = NotificationCompat.Builder(mService, CHANNEL_ID)
-                .setColor(ContextCompat.getColor(mService, R.color.colorPrimary))
+        builder.setStyle(
+                android.support.v4.media.app.NotificationCompat.MediaStyle()
+                        .setMediaSession(token)
+                        .setShowActionsInCompactView(0, 1, 2)
+                        // For backwards compatibility with Android L and earlier.
+                        .setShowCancelButton(true)
+                        .setCancelButtonIntent(
+                                MediaButtonReceiver.buildMediaButtonPendingIntent(
+                                        mService,
+                                        PlaybackStateCompat.ACTION_STOP)))
                 .setSmallIcon(R.drawable.ic_music_note_amber_a200_24dp)
                 // Pending intent that is fired when user clicks on notification.
+                .setContentIntent(createContentIntent(mService))
                 // Title - Usually Song name.
                 .setContentTitle(description.title)
-                .setContentIntent(createContentIntent(context = mService))
                 // Subtitle - Usually Artist name.
                 .setContentText(description.subtitle)
                 // When notification is deleted (when playback is paused and notification can be
@@ -102,16 +112,17 @@ class NotificationManager : AnkoLogger {
                 // Show controls on lock screen even when user hides sensitive content.
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
+        // If skip to next action is enabled.
+        if ((state.actions and PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) != 0L) {
+            builder.addAction(mPrevAction)
+        }
 
-        builder.addAction(mPrevAction)
         builder.addAction(if (isPlaying) mPauseAction else mPlayAction)
-        builder.addAction(mNextAction)
 
-
-        builder.setStyle(
-                android.support.v4.media.app.NotificationCompat.MediaStyle()
-                        .setMediaSession(token)
-                        .setShowActionsInCompactView(2))
+        // If skip to prev action is enabled.
+        if ((state.actions and PlaybackStateCompat.ACTION_SKIP_TO_NEXT) != 0L) {
+            builder.addAction(mNextAction)
+        }
 
         return builder
     }

@@ -121,7 +121,10 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         mediaSession = MediaSessionCompat(applicationContext, "Wiz_Music_Service", mediaButtonReceiver, null)
 
         mediaSession.setCallback(MediaSessionCallback())
-        mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
+
+        mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
+                MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS or
+                MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
 
         val mediaButtonIntent = Intent(Intent.ACTION_MEDIA_BUTTON)
         mediaButtonIntent.setClass(this, MediaButtonReceiver::class.java)
@@ -183,21 +186,34 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         }
 
         override fun onSkipToNext() {
-            super.onSkipToNext()
             playNextTrack()
         }
 
         override fun onSkipToPrevious() {
-            super.onSkipToPrevious()
             playPreviousTrack()
         }
     }
 
     private fun playPreviousTrack() {
 
+        trackPosition--
+
+        if (trackPosition >= 0) {
+
+            currentTrack = musicList?.get(trackPosition)
+
+            playSong(musicList?.get(trackPosition))
+
+        }
     }
 
     private fun playNextTrack() {
+
+        trackPosition = (++trackPosition % musicList?.size!!)
+
+        currentTrack = musicList?.get(trackPosition)
+
+        playSong(musicList?.get(trackPosition))
 
     }
 
@@ -237,6 +253,8 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         } else {
             playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE or PlaybackStateCompat.ACTION_PLAY)
         }
+
+        playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_SKIP_TO_NEXT or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
         playbackStateBuilder.setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0f)
         mediaSession.setPlaybackState(playbackStateBuilder.build())
     }

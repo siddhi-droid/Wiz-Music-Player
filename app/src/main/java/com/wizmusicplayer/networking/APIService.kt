@@ -12,5 +12,4 @@ interface APIService {
 
     @GET
     fun getArtistImage(@Url url: String): Single<ArtistInfo>
-
 }
