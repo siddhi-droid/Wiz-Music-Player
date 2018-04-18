@@ -106,8 +106,7 @@ class Dashboard : AppCompatActivity(), MusicCallbackInterface, AnkoLogger {
         initMediaSession()
         initViewPager()
     }
-
-
+    
     private fun initViewModel() {
         WizApplication.instance.getApplicationComponent().inject(this)
         musicViewModel = ViewModelProviders.of(this, viewModelFactory).get(MusicViewModel::class.java)

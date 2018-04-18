@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    tools:context="com.wizmusicplayer.SplashActivity">
+
+
+    <RelativeLayout
+        android:id="@+id/lottieLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:background="@color/colorPrimary"
+        android:visibility="gone">
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/animationView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:lottie_fileName="loading.json" />
+
+        <TextView
+            android:id="@+id/footer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:fontFamily="@font/alegreya_sans_sc_black_italic"
+            android:padding="20dp"
+            android:text="Getting your music"
+            android:textAllCaps="true"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="18sp" />
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/lottieLayoutPermissionDenied"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:background="@color/colorPrimary"
+        android:visibility="gone">
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/animationViewPermissionDenied"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:lottie_loop="true"
+            android:layout_above="@+id/tvPermissionRationale"
+            app:lottie_fileName="permission_denied.json" />
+
+
+        <TextView
+            android:id="@+id/tvPermissionRationale"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/btnGrantPermission"
+            android:layout_centerHorizontal="true"
+            android:fontFamily="@font/cabin"
+            android:gravity="center"
+            android:padding="20dp"
+            android:text="Grant access to external storage to scan music files in-order to play music"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btnGrantPermission"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:fontFamily="@font/alegreya_sans_sc_black_italic"
+            android:padding="16dp"
+            android:text="Grant Permission"
+            android:textAllCaps="true"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="18sp" />
+    </RelativeLayout>
+</RelativeLayout>

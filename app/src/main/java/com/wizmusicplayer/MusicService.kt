@@ -25,12 +25,12 @@ import android.content.Intent
 
 class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener, MediaPlayer.OnCompletionListener, AnkoLogger {
 
-    private lateinit var mediaSession: MediaSessionCompat
-    private lateinit var mediaPlayer: MediaPlayer
+    private var mediaSession: MediaSessionCompat? = null
+    private var mediaPlayer: MediaPlayer? = null
     private var currentTrack: MusicTrack? = null
-    private lateinit var notificationManager: com.wizmusicplayer.NotificationManager
-    private lateinit var playbackStateBuilder: PlaybackStateCompat.Builder
-    private lateinit var metadataBuilder: MediaMetadataCompat.Builder
+    private var notificationManager: com.wizmusicplayer.NotificationManager? = null
+    private var playbackStateBuilder: PlaybackStateCompat.Builder? = null
+    private var metadataBuilder: MediaMetadataCompat.Builder? = null
     private var trackPosition: Int = 0
     private var musicList: java.util.ArrayList<MusicTrack>? = ArrayList()
     private var trackBitmap: Bitmap? = null
@@ -56,23 +56,29 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
     }
 
     private fun audiMangerGain() {
-        if (!mediaPlayer.isPlaying) {
-            mediaPlayer.start()
+        if (!mediaPlayer?.isPlaying!!) {
+            mediaPlayer?.start()
+            setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING)
+            updateNotification()
         }
-        mediaPlayer.setVolume(1.0f, 1.0f)
+        mediaPlayer?.setVolume(1.0f, 1.0f)
     }
 
     private fun audioManagerTransientCanDuck() {
-        mediaPlayer.setVolume(0.3f, 0.3f)
+        mediaPlayer?.setVolume(0.3f, 0.3f)
     }
 
     private fun audioManagerTransient() {
-        mediaPlayer.pause()
+        mediaPlayer?.pause()
+        setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED)
+        updateNotification()
     }
 
     private fun audioManagerLoss() {
-        if (mediaPlayer.isPlaying) {
-            mediaPlayer.stop()
+        if (mediaPlayer?.isPlaying!!) {
+            mediaPlayer?.pause()
+            setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED)
+            updateNotification()
         }
     }
 
@@ -93,7 +99,7 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
 
     private fun initNotificationManger() {
         notificationManager = NotificationManager()
-        notificationManager.initNotificationManager(this)
+        notificationManager?.initNotificationManager(this)
     }
 
     private fun initNoisyReceiver() {
@@ -103,15 +109,15 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
 
     private fun initMediaPlayer() {
         mediaPlayer = MediaPlayer()
-        mediaPlayer.setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC)
-        mediaPlayer.setVolume(1.0f, 1.0f)
+        mediaPlayer?.setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
+        mediaPlayer?.setAudioStreamType(AudioManager.STREAM_MUSIC)
+        mediaPlayer?.setVolume(1.0f, 1.0f)
     }
 
     private val mNoisyReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            if (mediaPlayer.isPlaying) {
-                mediaPlayer.pause()
+            if (mediaPlayer?.isPlaying!!) {
+                mediaPlayer?.pause()
             }
         }
     }
@@ -120,18 +126,18 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         val mediaButtonReceiver = ComponentName(applicationContext, MediaButtonReceiver::class.java)
         mediaSession = MediaSessionCompat(applicationContext, "Wiz_Music_Service", mediaButtonReceiver, null)
 
-        mediaSession.setCallback(MediaSessionCallback())
+        mediaSession?.setCallback(MediaSessionCallback())
 
-        mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
+        mediaSession?.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
                 MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS or
                 MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
 
         val mediaButtonIntent = Intent(Intent.ACTION_MEDIA_BUTTON)
         mediaButtonIntent.setClass(this, MediaButtonReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(this, 0, mediaButtonIntent, 0)
-        mediaSession.setMediaButtonReceiver(pendingIntent)
+        mediaSession?.setMediaButtonReceiver(pendingIntent)
 
-        sessionToken = mediaSession.sessionToken
+        sessionToken = mediaSession?.sessionToken
     }
 
 
@@ -151,16 +157,16 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
                 return
             }
 
-            mediaPlayer.start()
-            mediaSession.isActive = true
+            mediaPlayer?.start()
+            mediaSession?.isActive = true
             setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING)
             updateNotification()
         }
 
         override fun onPause() {
             super.onPause()
-            if (mediaPlayer.isPlaying) {
-                mediaPlayer.pause()
+            if (mediaPlayer?.isPlaying!!) {
+                mediaPlayer?.pause()
                 setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED)
                 updateNotification()
             }
@@ -227,18 +233,18 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
 
     private fun playSong(musicTrack: MusicTrack?) {
 
-        mediaPlayer.reset()
+        mediaPlayer?.reset()
 
-        mediaPlayer.setDataSource(this@MusicService, musicTrack?.fileUri)
+        mediaPlayer?.setDataSource(this@MusicService, musicTrack?.fileUri)
 
-        mediaPlayer.prepareAsync()
+        mediaPlayer?.prepareAsync()
 
-        mediaPlayer.setOnPreparedListener {
+        mediaPlayer?.setOnPreparedListener {
 
             if (successfullyRetrievedAudioFocus()) {
                 startService(Intent(applicationContext, MusicService::class.java))
-                mediaSession.isActive = true
-                mediaPlayer.start()
+                mediaSession?.isActive = true
+                mediaPlayer?.start()
                 setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING)
                 initMediaSessionMetadata()
                 updateNotification()
@@ -248,34 +254,36 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
 
     private fun setMediaPlaybackState(state: Int) {
         playbackStateBuilder = PlaybackStateCompat.Builder()
-        playbackStateBuilder.setActions(
+        playbackStateBuilder?.setActions(
                 PlaybackStateCompat.ACTION_PLAY or
-                PlaybackStateCompat.ACTION_PAUSE or
-                PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
-                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
-        playbackStateBuilder.setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0f)
-        mediaSession.setPlaybackState(playbackStateBuilder.build())
+                        PlaybackStateCompat.ACTION_PAUSE or
+                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
+        playbackStateBuilder?.setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0f)
+        mediaSession?.setPlaybackState(playbackStateBuilder?.build())
     }
 
 
     private fun initMediaSessionMetadata() {
         metadataBuilder = MediaMetadataCompat.Builder()
-        metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, trackBitmap)
-        metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, trackBitmap)
-        metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher))
-        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, currentTrack?.title)
-        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, currentTrack?.artist)
-        mediaSession.setMetadata(metadataBuilder.build())
+        metadataBuilder?.putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, trackBitmap)
+        metadataBuilder?.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, trackBitmap)
+        metadataBuilder?.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher))
+        metadataBuilder?.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, currentTrack?.title)
+        metadataBuilder?.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, currentTrack?.artist)
+        mediaSession?.setMetadata(metadataBuilder?.build())
     }
 
 
     override fun onCompletion(mp: MediaPlayer?) {
-        mediaPlayer.release()
+        mediaPlayer?.release()
     }
 
     private fun updateNotification() {
-        val notification = notificationManager.getNotification(metadataBuilder.build(), playbackStateBuilder.build(), mediaSession.sessionToken)
-        startForeground(1337, notification)
+        metadataBuilder?.let {
+            val notification = notificationManager?.getNotification(metadataBuilder?.build(), playbackStateBuilder?.build(), mediaSession?.sessionToken)
+            startForeground(1337, notification)
+        }
     }
 
     override fun onDestroy() {

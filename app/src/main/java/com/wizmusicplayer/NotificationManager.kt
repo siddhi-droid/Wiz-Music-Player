@@ -68,19 +68,17 @@ class NotificationManager : AnkoLogger {
     }
 
 
-    fun getNotification(metadata: MediaMetadataCompat,
-                        playbackState: PlaybackStateCompat,
-                        token: MediaSessionCompat.Token): Notification {
-        val isPlaying = playbackState.state == PlaybackStateCompat.STATE_PLAYING
-        val description = metadata.description
+    fun getNotification(metadata: MediaMetadataCompat?, playbackState: PlaybackStateCompat?, token: MediaSessionCompat.Token?): Notification {
+        val isPlaying = playbackState?.state == PlaybackStateCompat.STATE_PLAYING
+        val description = metadata?.description
         val builder = buildNotification(playbackState, token, isPlaying, description)
         return builder.build()
     }
 
-    private fun buildNotification(state: PlaybackStateCompat,
-                                  token: MediaSessionCompat.Token,
-                                  isPlaying: Boolean,
-                                  description: MediaDescriptionCompat): NotificationCompat.Builder {
+    private fun buildNotification(state: PlaybackStateCompat?,
+                                  token: MediaSessionCompat.Token?,
+                                  isPlaying: Boolean?,
+                                  description: MediaDescriptionCompat?): NotificationCompat.Builder {
 
         // Create the (mandatory) notification channel when running on Android Oreo.
         if (isAndroidOreo()) {
@@ -102,9 +100,9 @@ class NotificationManager : AnkoLogger {
                 // Pending intent that is fired when user clicks on notification.
                 .setContentIntent(createContentIntent(mService))
                 // Title - Usually Song name.
-                .setContentTitle(description.title)
+                .setContentTitle(description?.title)
                 // Subtitle - Usually Artist name.
-                .setContentText(description.subtitle)
+                .setContentText(description?.subtitle)
                 // When notification is deleted (when playback is paused and notification can be
                 // deleted) fire MediaButtonPendingIntent with ACTION_STOP.
                 .setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(
@@ -113,14 +111,14 @@ class NotificationManager : AnkoLogger {
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
         // If skip to next action is enabled.
-        if ((state.actions and PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) != 0L) {
+        if ((state?.actions?.and(PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)) != 0L) {
             builder.addAction(mPrevAction)
         }
 
-        builder.addAction(if (isPlaying) mPauseAction else mPlayAction)
+        builder.addAction(if (isPlaying!!) mPauseAction else mPlayAction)
 
         // If skip to prev action is enabled.
-        if ((state.actions and PlaybackStateCompat.ACTION_SKIP_TO_NEXT) != 0L) {
+        if ((state?.actions?.and(PlaybackStateCompat.ACTION_SKIP_TO_NEXT)) != 0L) {
             builder.addAction(mNextAction)
         }
 

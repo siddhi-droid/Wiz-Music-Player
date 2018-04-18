@@ -110,7 +110,7 @@ dependencies {
     kapt 'com.github.bumptech.glide:compiler:4.6.1'
 
     // ***** Runtime Permissions ***** //
-    implementation 'com.karumi:dexter:4.2.0'
+    implementation 'com.github.florent37:runtime-permission-kotlin:1.0.1'
 
     // ***** Background Jobs ***** //
     implementation 'com.evernote:android-job:1.2.5'
