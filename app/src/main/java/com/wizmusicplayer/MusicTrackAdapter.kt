@@ -29,9 +29,10 @@ class MusicTrackAdapter(var tracksInterface: TracksInterface) : ListAdapter<Musi
             itemView.trackArtist.text = musicTrack.artist.plus(" \u2022 ").plus(MusicUtils.convertDuration(musicTrack.duration.toLong()))
             itemView.trackTitle.text = musicTrack.title
             itemView.trackCoverImage.loadURL(musicTrack.trackArt)
-            if (adapterPosition == -1)
-                return
-            itemView.rootLayout.setOnClickListener { tracksInterface.onClick(adapterPosition, getAllTracks()) }
+            itemView.rootLayout.setOnClickListener {
+                if (adapterPosition != -1)
+                    tracksInterface.onClick(adapterPosition, getAllTracks())
+            }
         }
     }
 

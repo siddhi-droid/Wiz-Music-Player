@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.2.31'
+    ext.kotlin_version = '1.2.30'
     ext.android_version = '27.1.1'
     ext.aac_version = '1.1.1'
     ext.aac_room = '1.0.0'

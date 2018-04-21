@@ -5,15 +5,12 @@ import android.arch.lifecycle.MutableLiveData
 import com.wizmusicplayer.*
 import com.wizmusicplayer.database.WizDatabase
 import com.wizmusicplayer.networking.APIService
-import io.reactivex.Completable
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.functions.BiConsumer
-import io.reactivex.internal.util.HalfSerializer.onComplete
-import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.async
-import org.jetbrains.anko.*
+import kotlinx.coroutines.experimental.launch
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
+import java.io.IOException
 import javax.inject.Inject
 
 
@@ -48,8 +45,7 @@ class MusicRepository @Inject constructor(private val apiService: APIService, pr
         async(CommonPool) {
             val artistList = MusicGenerator.getAllArtists()
             artistListLiveData.postValue(artistList)
-            // getArtistInfo(artistList.map { it.copy() }, artistListLiveData)
-
+            getArtistInfo(artistList.map { it.copy() }, artistListLiveData)
         }
         return artistListLiveData
     }
@@ -61,15 +57,23 @@ class MusicRepository @Inject constructor(private val apiService: APIService, pr
                     .plus("&artist=")
                     .plus(artist.artistName)
 
-            apiService.getArtistImage(url)
-                    .observeOn(Schedulers.io())
-                    .subscribeOn(Schedulers.io())
-                    .subscribe({ result ->
-                        artistList[index].artistCover = result.artist?.image?.get(2)?.text ?: ""
+            launch {
+                try {
+                    val request = apiService.getArtistImage(url)
+                    val response = request.await()
+                    if (response.isSuccessful) {
+                        val data = response.body()
+                        artistList[index].artistCover = data?.artist?.image?.get(2)?.text ?: ""
                         artistListLiveData.postValue(artistList)
-                    }, { error ->
-                        error.printStackTrace()
-                    })
+                    } else {
+                        info { "${response.code()}" }
+                    }
+                } catch (exception: IOException) {
+                    exception.printStackTrace()
+                } catch (exception: Throwable) {
+                    exception.printStackTrace()
+                }
+            }
         }
     }
 }

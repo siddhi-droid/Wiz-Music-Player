@@ -112,7 +112,7 @@ class MusicFragment : Fragment(), MusicTrackAdapter.TracksInterface, AnkoLogger 
     private fun setUpArtists() {
         artistAdapter = ArtistsAdapter()
         activity?.let {
-            view.recyclerView.withLinearLayout(it)
+            view.recyclerView.withGridLayout2X2(it)
             view.recyclerView.adapter = artistAdapter
             musicViewModel.getAllArtists().observe(this, Observer {
                 it?.let {

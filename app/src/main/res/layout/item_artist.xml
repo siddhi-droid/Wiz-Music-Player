@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_centerVertical="true"
-    android:layout_margin="8dp"
+     android:orientation="vertical"
     android:background="?selectableItemBackground"
     android:clickable="true">
 
 
-    <android.support.v7.widget.AppCompatImageView
+    <com.wizmusicplayer.SquareImageView
         android:id="@+id/artistCoverImage"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_margin="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
         android:background="@android:color/transparent"
         android:contentDescription="@string/track_image"
         android:scaleType="centerCrop"
@@ -26,7 +25,6 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="9dp"
         android:layout_marginTop="12dp"
-        android:layout_toEndOf="@+id/artistCoverImage"
         android:background="@android:color/transparent"
         android:ellipsize="end"
         android:fontFamily="@font/cabin"
@@ -39,9 +37,7 @@
         android:id="@+id/artistDetails"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/artistName"
         android:layout_marginStart="9dp"
-        android:layout_toEndOf="@+id/artistCoverImage"
         android:background="@android:color/transparent"
         android:fontFamily="@font/cabin"
         android:textColor="@color/secondaryTextColor"
@@ -49,4 +45,4 @@
         tools:text="Random text here" />
 
 
-</RelativeLayout>
+</LinearLayout>

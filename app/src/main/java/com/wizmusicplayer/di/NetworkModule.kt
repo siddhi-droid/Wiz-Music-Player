@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.experimental.CoroutineCallAdapterFactory
 import com.wizmusicplayer.BuildConfig
 import com.wizmusicplayer.Config
 import com.wizmusicplayer.networking.APIService
@@ -29,7 +30,7 @@ class NetworkModule {
         return Retrofit.Builder()
                 .baseUrl(Config.BING_BASE_URL)
                 .client(okHttpClient)
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .addCallAdapterFactory(CoroutineCallAdapterFactory())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
     }

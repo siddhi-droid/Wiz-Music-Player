@@ -112,6 +112,7 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         mediaPlayer?.setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
         mediaPlayer?.setAudioStreamType(AudioManager.STREAM_MUSIC)
         mediaPlayer?.setVolume(1.0f, 1.0f)
+        mediaPlayer?.setOnCompletionListener(this)
     }
 
     private val mNoisyReceiver = object : BroadcastReceiver() {
@@ -274,9 +275,8 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         mediaSession?.setMetadata(metadataBuilder?.build())
     }
 
-
     override fun onCompletion(mp: MediaPlayer?) {
-        mediaPlayer?.release()
+        playNextTrack()
     }
 
     private fun updateNotification() {
@@ -291,7 +291,7 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         updateNotification()
         super.onDestroy()
         unregisterReceiver(mNoisyReceiver)
-//        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+//        val audioManager = getSystemService(Conte`    xt.AUDIO_SERVICE) as AudioManager
 //        audioManager.abandonAudioFocus(this)
 //        mediaSession.release()
 //        NotificationManagerCompat.from(this).cancel(1337)
