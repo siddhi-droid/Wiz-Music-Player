@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.wizmusicplayer.R.id.recyclerView
 import com.wizmusicplayer.ui.MusicViewModel
 import kotlinx.android.synthetic.main.fragment_music.*
 import kotlinx.android.synthetic.main.fragment_music.view.*

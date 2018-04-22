@@ -33,7 +33,7 @@
             android:padding="20dp"
             android:text="Getting your music"
             android:textAllCaps="true"
-            android:textColor="@color/primaryTextColor"
+            android:textColor="@android:color/white"
             android:textSize="18sp" />
     </RelativeLayout>
 
@@ -65,7 +65,7 @@
             android:gravity="center"
             android:padding="20dp"
             android:text="Grant access to external storage to scan music files in-order to play music"
-            android:textColor="@color/primaryTextColor"
+            android:textColor="@android:color/white"
             android:textSize="18sp" />
 
         <Button
@@ -78,7 +78,7 @@
             android:padding="16dp"
             android:text="Grant Permission"
             android:textAllCaps="true"
-            android:textColor="@color/primaryTextColor"
+            android:textColor="@android:color/white"
             android:textSize="18sp" />
     </RelativeLayout>
 </RelativeLayout>

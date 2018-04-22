@@ -9,14 +9,14 @@
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layoutAnimation="@anim/layout_animation_fall_down"/>
+        android:layoutAnimation="@anim/layout_animation_fall_down" />
 
     <cc.solart.wave.WaveSideBarView
         android:id="@+id/sideView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:sidebarBackgroundColor="@color/colorPrimary"
-        app:sidebarChooseTextColor="@color/colorAccent"
+        app:sidebarBackgroundColor="@color/colorAccent"
+        app:sidebarChooseTextColor="@color/colorPrimary"
         app:sidebarTextColor="@android:color/darker_gray" />
 
 </RelativeLayout>

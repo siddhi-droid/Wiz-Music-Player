@@ -5,6 +5,7 @@ import android.content.ContentUris
 import android.net.Uri
 import android.provider.BaseColumns
 import android.provider.MediaStore
+import kotlinx.coroutines.experimental.Deferred
 
 class MusicGenerator {
 

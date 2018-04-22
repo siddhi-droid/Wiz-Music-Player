@@ -30,7 +30,7 @@
             android:layout_marginStart="16dp"
             android:fontFamily="@font/alegreya_sans_sc_black_italic"
             android:text="@string/dashboard_header_text"
-            android:textColor="@color/primaryTextColor" />
+            android:textColor="@color/colorAccent" />
 
     </android.support.v7.widget.Toolbar>
 
@@ -46,7 +46,7 @@
         app:tabIndicatorColor="@color/colorAccent"
         app:tabIndicatorHeight="4dp"
         app:tabMode="fixed"
-        app:tabSelectedTextColor="@android:color/black"
+        app:tabSelectedTextColor="@android:color/white"
         app:tabTextColor="@color/colorAccent" />
 
     <android.support.v4.view.ViewPager

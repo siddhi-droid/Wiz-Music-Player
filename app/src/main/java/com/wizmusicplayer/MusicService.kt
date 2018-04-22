@@ -21,6 +21,12 @@ import android.text.TextUtils
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import android.content.Intent
+import com.bumptech.glide.Glide
+import kotlinx.coroutines.experimental.async
+import android.provider.MediaStore
+import android.support.v4.content.ContextCompat
+import androidx.core.net.toUri
+import kotlinx.coroutines.experimental.launch
 
 
 class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener, MediaPlayer.OnCompletionListener, AnkoLogger {
@@ -34,6 +40,7 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
     private var trackPosition: Int = 0
     private var musicList: java.util.ArrayList<MusicTrack>? = ArrayList()
     private var trackBitmap: Bitmap? = null
+    private var isServiceStarted: Boolean = false
 
     @Nullable
     override fun onGetRoot(clientPackageName: String, clientUid: Int, @Nullable rootHints: Bundle?): MediaBrowserServiceCompat.BrowserRoot? {
@@ -71,14 +78,14 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
     private fun audioManagerTransient() {
         mediaPlayer?.pause()
         setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED)
-        updateNotification()
+        updatePauseNotification()
     }
 
     private fun audioManagerLoss() {
         if (mediaPlayer?.isPlaying!!) {
             mediaPlayer?.pause()
             setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED)
-            updateNotification()
+            updatePauseNotification()
         }
     }
 
@@ -129,9 +136,10 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
 
         mediaSession?.setCallback(MediaSessionCallback())
 
-        mediaSession?.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
-                MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS or
-                MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
+        mediaSession?.setFlags(
+                MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
+                        MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS or
+                        MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
 
         val mediaButtonIntent = Intent(Intent.ACTION_MEDIA_BUTTON)
         mediaButtonIntent.setClass(this, MediaButtonReceiver::class.java)
@@ -169,13 +177,13 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
             if (mediaPlayer?.isPlaying!!) {
                 mediaPlayer?.pause()
                 setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED)
-                updateNotification()
+                updatePauseNotification()
             }
         }
 
         override fun onStop() {
             super.onStop()
-            info { "onStop" }
+            onDestroy()
         }
 
         override fun onSeekTo(pos: Long) {
@@ -234,6 +242,14 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
 
     private fun playSong(musicTrack: MusicTrack?) {
 
+        launch {
+            try {
+                trackBitmap = MediaStore.Images.Media.getBitmap(this@MusicService.contentResolver, musicTrack?.trackArt?.toUri())
+            } catch (exception: Exception) {
+                exception.printStackTrace()
+            }
+        }
+
         mediaPlayer?.reset()
 
         mediaPlayer?.setDataSource(this@MusicService, musicTrack?.fileUri)
@@ -243,7 +259,6 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         mediaPlayer?.setOnPreparedListener {
 
             if (successfullyRetrievedAudioFocus()) {
-                startService(Intent(applicationContext, MusicService::class.java))
                 mediaSession?.isActive = true
                 mediaPlayer?.start()
                 setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING)
@@ -259,7 +274,8 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
                 PlaybackStateCompat.ACTION_PLAY or
                         PlaybackStateCompat.ACTION_PAUSE or
                         PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
-                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
+                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
+                        PlaybackStateCompat.ACTION_STOP)
         playbackStateBuilder?.setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0f)
         mediaSession?.setPlaybackState(playbackStateBuilder?.build())
     }
@@ -282,19 +298,37 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
     private fun updateNotification() {
         metadataBuilder?.let {
             val notification = notificationManager?.getNotification(metadataBuilder?.build(), playbackStateBuilder?.build(), mediaSession?.sessionToken)
+            if (!isServiceStarted) {
+                ContextCompat.startForegroundService(this@MusicService,
+                        Intent(this@MusicService, MusicService::class.java))
+                isServiceStarted = true
+            }
             startForeground(1337, notification)
+        }
+    }
+
+    private fun updatePauseNotification() {
+        metadataBuilder?.let {
+            val notification = notificationManager?.getNotification(metadataBuilder?.build(), playbackStateBuilder?.build(), mediaSession?.sessionToken)
+            notificationManager?.getNotificationManager()?.notify(1337, notification)
         }
     }
 
     override fun onDestroy() {
         info { "onDestroy" }
-        updateNotification()
-        super.onDestroy()
-        unregisterReceiver(mNoisyReceiver)
-//        val audioManager = getSystemService(Conte`    xt.AUDIO_SERVICE) as AudioManager
-//        audioManager.abandonAudioFocus(this)
-//        mediaSession.release()
-//        NotificationManagerCompat.from(this).cancel(1337)
+        stopForeground(true)
+        stopSelf()
+        isServiceStarted = false
+        try {
+            unregisterReceiver(mNoisyReceiver)
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+        }
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager.abandonAudioFocus(this)
+        mediaSession?.release()
+        mediaPlayer?.release()
+        NotificationManagerCompat.from(this).cancel(1337)
     }
 
 }

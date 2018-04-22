@@ -22,7 +22,7 @@ fun ImageView.loadURL(url: String) {
 }
 
 fun RecyclerView.withGridLayout2X2(context: Context) {
-    this.layoutManager = GridLayoutManager(context, 3)
+    this.layoutManager = GridLayoutManager(context, 2)
     this.addItemDecoration(SpacesItemDecoration(2))
 }
 

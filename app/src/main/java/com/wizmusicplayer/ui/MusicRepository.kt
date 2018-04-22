@@ -6,6 +6,7 @@ import com.wizmusicplayer.*
 import com.wizmusicplayer.database.WizDatabase
 import com.wizmusicplayer.networking.APIService
 import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
@@ -18,7 +19,7 @@ class MusicRepository @Inject constructor(private val apiService: APIService, pr
 
     fun getAllTracks(): LiveData<List<MusicTrack>> {
         val tracksListLiveData = MutableLiveData<List<MusicTrack>>()
-        async(CommonPool) {
+        launch {
             tracksListLiveData.postValue(MusicGenerator.getAllTracks())
         }
         return tracksListLiveData
@@ -26,7 +27,7 @@ class MusicRepository @Inject constructor(private val apiService: APIService, pr
 
     fun getAllGenre(): LiveData<List<Genre>> {
         val genreListLiveData = MutableLiveData<List<Genre>>()
-        async(CommonPool) {
+        launch {
             genreListLiveData.postValue(MusicGenerator.getGenre())
         }
         return genreListLiveData
@@ -34,7 +35,7 @@ class MusicRepository @Inject constructor(private val apiService: APIService, pr
 
     fun getAllAlbums(): LiveData<List<MusicAlbum>> {
         val musicAlbumListLiveData = MutableLiveData<List<MusicAlbum>>()
-        async(CommonPool) {
+        launch {
             musicAlbumListLiveData.postValue(MusicGenerator.getAllAlbums())
         }
         return musicAlbumListLiveData
@@ -42,7 +43,7 @@ class MusicRepository @Inject constructor(private val apiService: APIService, pr
 
     fun getAllArtists(): LiveData<List<Artist>> {
         val artistListLiveData = MutableLiveData<List<Artist>>()
-        async(CommonPool) {
+        launch {
             val artistList = MusicGenerator.getAllArtists()
             artistListLiveData.postValue(artistList)
             getArtistInfo(artistList.map { it.copy() }, artistListLiveData)
@@ -63,14 +64,14 @@ class MusicRepository @Inject constructor(private val apiService: APIService, pr
                     val response = request.await()
                     if (response.isSuccessful) {
                         val data = response.body()
-                        artistList[index].artistCover = data?.artist?.image?.get(2)?.text ?: ""
+                        artistList[index].artistCover = data?.artist?.image?.get(3)?.text ?: ""
                         artistListLiveData.postValue(artistList)
                     } else {
                         info { "${response.code()}" }
                     }
-                } catch (exception: IOException) {
-                    exception.printStackTrace()
-                } catch (exception: Throwable) {
+                } catch (ioException: IOException) {
+                    ioException.printStackTrace()
+                } catch (exception: Exception) {
                     exception.printStackTrace()
                 }
             }

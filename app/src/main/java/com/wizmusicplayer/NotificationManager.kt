@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -21,21 +22,21 @@ import org.jetbrains.anko.AnkoLogger
 
 class NotificationManager : AnkoLogger {
 
-    private lateinit var mService: MusicService
+    private var mService: MusicService? = null
     private val CHANNEL_ID = "Wiz Music"
-    private val REQUEST_CODE: Int = 999
 
     private lateinit var mPlayAction: NotificationCompat.Action
     private lateinit var mPauseAction: NotificationCompat.Action
     private lateinit var mNextAction: NotificationCompat.Action
     private lateinit var mPrevAction: NotificationCompat.Action
+    private lateinit var mStopAction: NotificationCompat.Action
     private lateinit var mNotificationManager: NotificationManager
 
     fun initNotificationManager(service: MusicService) {
 
         mService = service
 
-        mNotificationManager = mService.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        mNotificationManager = mService!!.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         mPlayAction = NotificationCompat.Action(
                 R.drawable.ic_play_arrow_black_24dp,
@@ -61,12 +62,21 @@ class NotificationManager : AnkoLogger {
                 MediaButtonReceiver.buildMediaButtonPendingIntent(
                         mService,
                         PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS))
+        mStopAction = NotificationCompat.Action(
+                R.drawable.ic_clear_black_24dp,
+                "Previous",
+                MediaButtonReceiver.buildMediaButtonPendingIntent(
+                        mService,
+                        PlaybackStateCompat.ACTION_STOP))
 
         // Cancel all notifications to handle the case where the Service was killed and
         // restarted by the system.
         mNotificationManager.cancelAll()
     }
 
+    fun getNotificationManager(): NotificationManager {
+        return mNotificationManager
+    }
 
     fun getNotification(metadata: MediaMetadataCompat?, playbackState: PlaybackStateCompat?, token: MediaSessionCompat.Token?): Notification {
         val isPlaying = playbackState?.state == PlaybackStateCompat.STATE_PLAYING
@@ -85,7 +95,7 @@ class NotificationManager : AnkoLogger {
             createChannel()
         }
 
-        val builder = NotificationCompat.Builder(mService, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(mService!!, CHANNEL_ID)
         builder.setStyle(
                 android.support.v4.media.app.NotificationCompat.MediaStyle()
                         .setMediaSession(token)
@@ -98,29 +108,20 @@ class NotificationManager : AnkoLogger {
                                         PlaybackStateCompat.ACTION_STOP)))
                 .setSmallIcon(R.drawable.ic_music_note_amber_a200_24dp)
                 // Pending intent that is fired when user clicks on notification.
-                .setContentIntent(createContentIntent(mService))
+                .setContentIntent(createContentIntent(mService!!))
                 // Title - Usually Song name.
                 .setContentTitle(description?.title)
                 // Subtitle - Usually Artist name.
                 .setContentText(description?.subtitle)
-                // When notification is deleted (when playback is paused and notification can be
-                // deleted) fire MediaButtonPendingIntent with ACTION_STOP.
-                .setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(
-                        mService, PlaybackStateCompat.ACTION_STOP))
+                .setLargeIcon(description?.iconBitmap)
                 // Show controls on lock screen even when user hides sensitive content.
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
-        // If skip to next action is enabled.
-        if ((state?.actions?.and(PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)) != 0L) {
-            builder.addAction(mPrevAction)
-        }
 
+        builder.addAction(mStopAction)
+        builder.addAction(mPrevAction)
         builder.addAction(if (isPlaying!!) mPauseAction else mPlayAction)
-
-        // If skip to prev action is enabled.
-        if ((state?.actions?.and(PlaybackStateCompat.ACTION_SKIP_TO_NEXT)) != 0L) {
-            builder.addAction(mNextAction)
-        }
+        builder.addAction(mNextAction)
 
         return builder
     }
@@ -144,17 +145,20 @@ class NotificationManager : AnkoLogger {
     }
 
 
-    private fun createContentIntent(context: Context): PendingIntent {
+    private fun getDeleteIntent(): PendingIntent {
+        val intent = Intent(mService, com.wizmusicplayer.NotificationManager::class.java)
+        intent.action = "NMStop"
+        return PendingIntent.getBroadcast(mService, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT)
+    }
 
-        val requestID = System.currentTimeMillis().toInt()
+    private fun createContentIntent(context: Context): PendingIntent {
 
         val notificationIntent = Intent(context, Dashboard::class.java)
 
         notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
 
-        return PendingIntent.getActivity(context, requestID, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        return PendingIntent.getActivity(context, 500, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
     }
-
 
 }
