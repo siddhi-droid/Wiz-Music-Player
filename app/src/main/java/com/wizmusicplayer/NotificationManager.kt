@@ -4,14 +4,12 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
-import android.support.v4.content.ContextCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaButtonReceiver
@@ -113,6 +111,7 @@ class NotificationManager : AnkoLogger {
                 .setContentTitle(description?.title)
                 // Subtitle - Usually Artist name.
                 .setContentText(description?.subtitle)
+                .setUsesChronometer(true)
                 .setLargeIcon(description?.iconBitmap)
                 // Show controls on lock screen even when user hides sensitive content.
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -128,27 +127,19 @@ class NotificationManager : AnkoLogger {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createChannel() {
-        if (mNotificationManager.getNotificationChannel(CHANNEL_ID) == null) {
-            val name = "Wiz Music"
-            val description = "This channel provides music playback to Wiz Music"
-            val importance = NotificationManager.IMPORTANCE_HIGH
-            val mChannel = NotificationChannel(CHANNEL_ID, name, importance)
-            mChannel.description = description
-            mChannel.enableLights(true)
-            mChannel.lightColor = Color.YELLOW
-            mNotificationManager.createNotificationChannel(mChannel)
-        }
+        val channelId = "Wiz Music"
+        val channelName = "Wiz Music Player"
+        val notificationChannel = NotificationChannel(channelId,
+                channelName, NotificationManager.IMPORTANCE_HIGH)
+        notificationChannel.lightColor = Color.BLUE
+        notificationChannel.importance = NotificationManager.IMPORTANCE_NONE
+        notificationChannel.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+        val service = mService?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        service.createNotificationChannel(notificationChannel)
     }
 
     private fun isAndroidOreo(): Boolean {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-    }
-
-
-    private fun getDeleteIntent(): PendingIntent {
-        val intent = Intent(mService, com.wizmusicplayer.NotificationManager::class.java)
-        intent.action = "NMStop"
-        return PendingIntent.getBroadcast(mService, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT)
     }
 
     private fun createContentIntent(context: Context): PendingIntent {

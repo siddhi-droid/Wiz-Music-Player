@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:icon="@drawable/ic_music_note_black_24dp"
+        android:title="Tracks" />
+
+    <item
+        android:icon="@drawable/ic_group_black_24dp"
+        android:title="Artists" />
+
+    <item
+        android:icon="@drawable/ic_album_black_24dp"
+        android:title="Albums" />
+
+    <item
+        android:icon="@drawable/ic_style_black_24dp"
+        android:title="Genre" />
+
+</menu>

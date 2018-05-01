@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#54ABF4</color>
-    <color name="colorPrimaryDark">#4D8DCE</color>
+    <color name="colorPrimary">#71C068</color>
+    <color name="colorPrimaryDark">#71C068</color>
     <color name="colorRipple">#80FFD667</color>
     <color name="colorAccent">#FFF</color>
 
     <color name="primaryTextColor">#42393B</color>
     <color name="secondaryTextColor">#968C93</color>
     <color name="divider">#D6D6D6</color>
+
+
+    <array name="tabColors">
+        <item name="tab1">#71C068</item>
+        <item name="tab2">#42393B</item>
+        <item name="tab3">#3F51B5</item>
+        <item name="tab4">#3E4757</item>
+    </array>
+
 </resources>

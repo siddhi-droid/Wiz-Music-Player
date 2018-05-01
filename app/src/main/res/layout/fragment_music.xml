@@ -15,8 +15,8 @@
         android:id="@+id/sideView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:sidebarBackgroundColor="@color/colorAccent"
-        app:sidebarChooseTextColor="@color/colorPrimary"
+        app:sidebarBackgroundColor="@color/colorPrimary"
+        app:sidebarChooseTextColor="@android:color/white"
         app:sidebarTextColor="@android:color/darker_gray" />
 
 </RelativeLayout>

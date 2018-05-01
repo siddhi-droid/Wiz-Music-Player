@@ -9,8 +9,10 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import android.os.PowerManager
+import android.provider.MediaStore
 import android.support.annotation.Nullable
 import android.support.v4.app.NotificationManagerCompat
+import android.support.v4.content.ContextCompat
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaBrowserServiceCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -18,15 +20,12 @@ import android.support.v4.media.session.MediaButtonReceiver
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.text.TextUtils
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
-import android.content.Intent
-import com.bumptech.glide.Glide
-import kotlinx.coroutines.experimental.async
-import android.provider.MediaStore
-import android.support.v4.content.ContextCompat
 import androidx.core.net.toUri
 import kotlinx.coroutines.experimental.launch
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
+import java.lang.IllegalStateException
+import android.content.Intent
 
 
 class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener, MediaPlayer.OnCompletionListener, AnkoLogger {
@@ -110,7 +109,7 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
     }
 
     private fun initNoisyReceiver() {
-        val filter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+        val filter = IntentFilter(AudioManager.ACTION_HEADSET_PLUG)
         registerReceiver(mNoisyReceiver, filter)
     }
 
@@ -124,9 +123,20 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
 
     private val mNoisyReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            if (mediaPlayer?.isPlaying!!) {
-                mediaPlayer?.pause()
+            if (intent.action == Intent.ACTION_HEADSET_PLUG) {
+                val state = intent.getIntExtra("state", -1)
+                when (state) {
+                    0 -> headPhoneUnPlugged()
+                }
             }
+        }
+    }
+
+    private fun headPhoneUnPlugged() {
+        if (mediaPlayer?.isPlaying!!) {
+            mediaPlayer?.pause()
+            setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING)
+            updatePauseNotification()
         }
     }
 
@@ -250,6 +260,9 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
             }
         }
 
+        if (mediaPlayer == null)
+            initMediaPlayer()
+
         mediaPlayer?.reset()
 
         mediaPlayer?.setDataSource(this@MusicService, musicTrack?.fileUri)
@@ -328,6 +341,7 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         audioManager.abandonAudioFocus(this)
         mediaSession?.release()
         mediaPlayer?.release()
+        mediaPlayer = null
         NotificationManagerCompat.from(this).cancel(1337)
     }
 

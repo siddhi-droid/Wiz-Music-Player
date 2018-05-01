@@ -3,7 +3,6 @@ package com.wizmusicplayer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.ComponentName
-import android.content.Intent
 import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
@@ -17,6 +16,7 @@ import android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING
 import android.support.v7.app.AppCompatActivity
 import android.view.WindowManager
 import androidx.core.net.toUri
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigationAdapter
 import com.wizmusicplayer.ui.MusicViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.AnkoLogger
@@ -104,9 +104,9 @@ class Dashboard : AppCompatActivity(), MusicCallbackInterface, AnkoLogger {
         setStatusBarColor()
         initViewModel()
         initMediaSession()
-        initViewPager()
+        initBottomNav()
     }
-    
+
     private fun initViewModel() {
         WizApplication.instance.getApplicationComponent().inject(this)
         musicViewModel = ViewModelProviders.of(this, viewModelFactory).get(MusicViewModel::class.java)
@@ -117,11 +117,25 @@ class Dashboard : AppCompatActivity(), MusicCallbackInterface, AnkoLogger {
         mMediaBrowserCompat.connect()
     }
 
-    private fun initViewPager() {
+    private fun initBottomNav() {
         viewPagerAdapter = DashboardViewPagerAdapter(supportFragmentManager, getFragmentTitles())
         viewPager.adapter = viewPagerAdapter
         viewPager.offscreenPageLimit = 4
-        tabLayout.setupWithViewPager(viewPager)
+
+        val tabColors = applicationContext.resources.getIntArray(R.array.tabColors)
+        val navigationAdapter = AHBottomNavigationAdapter(this, R.menu.bottom_nav_menu)
+        navigationAdapter.setupWithBottomNavigation(bottomNavigation, tabColors)
+
+        bottomNavigation.defaultBackgroundColor = this.resources.getColor(R.color.colorPrimary)
+        bottomNavigation.accentColor = this.resources.getColor(android.R.color.white)
+        bottomNavigation.isForceTint = true
+        bottomNavigation.isTranslucentNavigationEnabled = true
+        bottomNavigation.isColored = true
+
+        bottomNavigation.setOnTabSelectedListener { position, _ ->
+            viewPager.currentItem = position
+            true
+        }
     }
 
     private fun getFragmentTitles(): MutableList<String> {

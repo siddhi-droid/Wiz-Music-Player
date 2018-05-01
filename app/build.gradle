@@ -84,7 +84,7 @@ dependencies {
     implementation "com.android.support:customtabs:$android_version"
     implementation "com.android.support:support-v4:$android_version"
     implementation "com.android.support:support-v13:$android_version"
-    implementation 'com.android.support.constraint:constraint-layout:1.1.0-beta6'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
     implementation 'com.android.support:multidex:1.0.3'
     implementation 'androidx.core:core-ktx:0.3'
 
@@ -103,7 +103,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.3.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.6.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.9.1'
     implementation "io.reactivex.rxjava2:rxandroid:2.0.1"
 
     // ***** Image Loading ***** //
@@ -125,6 +125,7 @@ dependencies {
 
     // ***** 3rd Party Stuff ***** //
     implementation 'com.github.Solartisan:WaveSideBar:a4aacb002f'
+    implementation 'com.aurelhubert:ahbottomnavigation:2.1.0'
 
 
 }
